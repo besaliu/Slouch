@@ -8,6 +8,7 @@ const SLOUCH_TIME_THRESHOLD_MS = 5000; // 5 seconds of slouching before notifica
 const COOLDOWN_MS = 5 * 60 * 1000; // 5 minutes between notifications
 const DETECTION_INTERVAL_MS = 100; // Run detection every 100ms (~10fps)
 const MAX_TIME_DELTA_MS = 500; // Cap time delta to prevent huge jumps when returning from background
+const EYE_BREAK_INTERVAL_MS = 20 * 60 * 1000; // 20 minutes for 20-20-20 rule
 
 export function usePostureLogic(
     landmarker: PoseLandmarker | null,
@@ -32,6 +33,7 @@ export function usePostureLogic(
     const slouchStartTime = useRef<number | null>(null);
     const timestampCounter = useRef<number>(0);
     const intervalId = useRef<ReturnType<typeof setInterval> | null>(null);
+    const lastEyeBreakTime = useRef<number>(0); // Track 20-20-20 rule notifications
 
     // Track last known posture state for background tracking
     const lastKnownSlouching = useRef<boolean>(false);
@@ -84,6 +86,16 @@ export function usePostureLogic(
                     }
                 } else {
                     store.updateSessionStats(timeDelta, 0);
+                }
+
+                // 20-20-20 Rule: Send eye break reminder every 20 minutes
+                const timeSinceLastEyeBreak = now - lastEyeBreakTime.current;
+                if (timeSinceLastEyeBreak >= EYE_BREAK_INTERVAL_MS) {
+                    sendAppNotification(
+                        '👁️ Eye Break Time!',
+                        '20-20-20 Rule: Look at something 20 feet away for 20 seconds to reduce eye strain.'
+                    );
+                    lastEyeBreakTime.current = now;
                 }
             }
 
@@ -179,6 +191,7 @@ export function usePostureLogic(
         console.log("[Posture] Starting detection loop");
         timestampCounter.current = 0;
         lastUpdateTime.current = Date.now();
+        lastEyeBreakTime.current = Date.now(); // Initialize so first reminder is 20 min after start
         intervalId.current = setInterval(runDetection, DETECTION_INTERVAL_MS);
 
         return () => {
@@ -196,6 +209,7 @@ export function usePostureLogic(
             lastKnownSlouching.current = false;
             slouchStartTime.current = null;
             lastUpdateTime.current = 0;
+            lastEyeBreakTime.current = 0;
             setSlouchTimer(0);
             setIsSlouching(false);
         }
