@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useMediaPipe } from './hooks/useMediaPipe';
 import { useCamera } from './hooks/useCamera';
 import { usePostureLogic } from './hooks/usePostureLogic';
@@ -31,6 +31,23 @@ function App() {
     setSensitivity,
     dismissSummary
   } = useAppStore();
+
+  // State for manual sensitivity input
+  const [isEditingSensitivity, setIsEditingSensitivity] = useState(false);
+  const [sensitivityInput, setSensitivityInput] = useState(String(Math.round(sensitivity * 100)));
+
+  // Handle manual sensitivity input
+  const handleSensitivityChange = (value: string) => {
+    const numValue = parseInt(value) || 0;
+    // Clamp between 50-95%
+    const clamped = Math.max(50, Math.min(95, numValue));
+    setSensitivityInput(String(clamped));
+    setSensitivity(clamped / 100);
+  };
+
+  const handleSensitivityBlur = () => {
+    setIsEditingSensitivity(false);
+  };
 
   // Format milliseconds to readable time
   const formatTime = (ms: number) => {
@@ -161,22 +178,47 @@ function App() {
                 Sensitivity
               </label>
               <p className="text-xs text-white/50">
-                Adjust how strict slouch detection is
+                Adjust how strict slouch detection is (50-95%)
               </p>
             </div>
             <div className="space-y-4">
               <input
                 type="range"
-                min="0.5"
-                max="0.95"
-                step="0.05"
-                value={sensitivity}
-                onChange={(e) => setSensitivity(parseFloat(e.target.value))}
+                min="50"
+                max="95"
+                step="1"
+                value={Math.round(sensitivity * 100)}
+                onChange={(e) => setSensitivity(parseInt(e.target.value) / 100)}
                 className="w-full h-3 cursor-pointer"
               />
-              <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/10">
+              <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/10 hover:border-white/20 transition-all duration-300">
                 <span className="text-sm text-white/70">Current Value</span>
-                <span className="text-xl font-mono font-bold text-indigo-400">{Math.round(sensitivity * 100)}%</span>
+                {isEditingSensitivity ? (
+                  <input
+                    type="number"
+                    min="50"
+                    max="95"
+                    value={sensitivityInput}
+                    onChange={(e) => handleSensitivityChange(e.target.value)}
+                    onBlur={handleSensitivityBlur}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') handleSensitivityBlur();
+                    }}
+                    autoFocus
+                    className="w-16 bg-indigo-500/20 border border-indigo-400/50 rounded px-2 py-1 text-right text-lg font-mono font-bold text-indigo-400 focus:outline-none focus:border-indigo-400"
+                  />
+                ) : (
+                  <button
+                    onClick={() => {
+                      setIsEditingSensitivity(true);
+                      setSensitivityInput(String(Math.round(sensitivity * 100)));
+                    }}
+                    className="text-xl font-mono font-bold text-indigo-400 hover:text-indigo-300 cursor-pointer transition-colors duration-200 px-3 py-1 rounded hover:bg-indigo-500/10"
+                    title="Click to manually enter sensitivity"
+                  >
+                    {Math.round(sensitivity * 100)}%
+                  </button>
+                )}
               </div>
             </div>
           </div>
