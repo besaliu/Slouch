@@ -1,0 +1,33 @@
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="ghostGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#818cf8;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#6366f1;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Ghost body -->
+  <path d="M 256 60 C 180 60 120 120 120 200 L 120 350 C 120 420 180 480 256 480 C 332 480 392 420 392 350 L 392 200 C 392 120 332 60 256 60 Z" fill="url(#ghostGradient)" stroke="#4f46e5" stroke-width="8"/>
+
+  <!-- Bottom wavy edges -->
+  <circle cx="160" cy="380" r="35" fill="url(#ghostGradient)" stroke="#4f46e5" stroke-width="6"/>
+  <circle cx="220" cy="400" r="38" fill="url(#ghostGradient)" stroke="#4f46e5" stroke-width="6"/>
+  <circle cx="290" cy="405" r="40" fill="url(#ghostGradient)" stroke="#4f46e5" stroke-width="6"/>
+  <circle cx="355" cy="395" r="38" fill="url(#ghostGradient)" stroke="#4f46e5" stroke-width="6"/>
+
+  <!-- Left eye -->
+  <circle cx="200" cy="200" r="32" fill="white"/>
+  <circle cx="200" cy="205" r="20" fill="#1f2937"/>
+  <circle cx="205" cy="200" r="10" fill="white"/>
+
+  <!-- Right eye -->
+  <circle cx="312" cy="200" r="32" fill="white"/>
+  <circle cx="312" cy="205" r="20" fill="#1f2937"/>
+  <circle cx="317" cy="200" r="10" fill="white"/>
+
+  <!-- Mouth (simple O shape) -->
+  <circle cx="256" cy="300" r="28" fill="none" stroke="#1f2937" stroke-width="8"/>
+
+  <!-- Shine effect -->
+  <ellipse cx="200" cy="150" rx="80" ry="60" fill="white" opacity="0.15"/>
+</svg>

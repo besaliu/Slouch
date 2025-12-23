@@ -1,0 +1,235 @@
+@import "tailwindcss";
+
+/* Ghost Theme Colors as CSS Variables */
+:root {
+  --ghost-bg: rgba(12, 14, 20, 0.45);
+  --ghost-glass: rgba(255, 255, 255, 0.025);
+  --ghost-glass-border: rgba(255, 255, 255, 0.05);
+  --ghost-glass-strong: rgba(18, 20, 28, 0.5);
+
+  --spectral: #818cf8;
+  --spectral-dim: #6366f1;
+  --spectral-glow: #a5b4fc;
+
+  --ectoplasm: #34d399;
+  --ectoplasm-dim: #10b981;
+
+  --warning: #f87171;
+  --warning-dim: #ef4444;
+}
+
+* {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+html, body {
+  background: transparent !important;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+  overflow: hidden;
+  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color-scheme: dark;
+}
+
+#root {
+  width: 100%;
+  height: 100vh;
+  background: var(--ghost-bg);
+  backdrop-filter: blur(50px) saturate(140%);
+  -webkit-backdrop-filter: blur(50px) saturate(140%);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Ghost Glass Panels */
+.ghost-glass {
+  background: var(--ghost-glass);
+  backdrop-filter: blur(20px) saturate(120%);
+  -webkit-backdrop-filter: blur(20px) saturate(120%);
+  border: 1px solid var(--ghost-glass-border);
+}
+
+.ghost-glass-strong {
+  background: var(--ghost-glass-strong);
+  backdrop-filter: blur(30px) saturate(140%);
+  -webkit-backdrop-filter: blur(30px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Spectral Glow Effects */
+.spectral-glow {
+  box-shadow:
+    0 0 30px rgba(129, 140, 248, 0.12),
+    0 0 80px rgba(129, 140, 248, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.spectral-glow-strong {
+  box-shadow:
+    0 0 40px rgba(129, 140, 248, 0.2),
+    0 0 100px rgba(129, 140, 248, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+/* Warning Glow */
+.warning-glow {
+  box-shadow:
+    0 0 40px rgba(248, 113, 113, 0.25),
+    0 0 100px rgba(248, 113, 113, 0.1);
+}
+
+/* Ghost Buttons */
+.ghost-btn {
+  background: rgba(129, 140, 248, 0.08);
+  border: 1px solid rgba(129, 140, 248, 0.15);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ghost-btn:hover {
+  background: rgba(129, 140, 248, 0.15);
+  border-color: rgba(129, 140, 248, 0.3);
+  transform: translateY(-1px);
+}
+
+.ghost-btn:active {
+  transform: scale(0.98);
+}
+
+.ghost-btn-solid {
+  background: linear-gradient(135deg, rgba(129, 140, 248, 0.85), rgba(99, 102, 241, 0.9));
+  border: 1px solid rgba(165, 180, 252, 0.3);
+  color: white;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 20px rgba(129, 140, 248, 0.25);
+}
+
+.ghost-btn-solid:hover {
+  background: linear-gradient(135deg, rgba(129, 140, 248, 0.95), rgba(99, 102, 241, 1));
+  box-shadow: 0 6px 30px rgba(129, 140, 248, 0.35);
+  transform: translateY(-1px);
+}
+
+.ghost-btn-solid:active {
+  transform: scale(0.98);
+}
+
+/* Mirror mode for video */
+.mirror-mode {
+  transform: scaleX(-1);
+}
+
+/* Custom scrollbar - invisible */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Drag handle for Tauri */
+.drag-handle {
+  -webkit-app-region: drag;
+}
+.no-drag {
+  -webkit-app-region: no-drag;
+}
+
+/* Custom range input */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+}
+
+input[type="range"]::-webkit-slider-track {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 9999px;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  background: linear-gradient(135deg, var(--spectral), var(--spectral-dim));
+  border-radius: 50%;
+  cursor: pointer;
+  margin-top: -6px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 20px rgba(129, 140, 248, 0.5);
+  transition: all 0.2s ease;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 0 0 30px rgba(129, 140, 248, 0.7);
+}
+
+/* Color utility classes */
+.text-spectral { color: var(--spectral); }
+.text-spectral-dim { color: var(--spectral-dim); }
+.text-ectoplasm { color: var(--ectoplasm); }
+.text-ectoplasm-dim { color: var(--ectoplasm-dim); }
+.text-warning { color: var(--warning); }
+.text-warning-dim { color: var(--warning-dim); }
+
+.bg-spectral { background-color: var(--spectral); }
+.bg-ectoplasm { background-color: var(--ectoplasm); }
+.bg-warning { background-color: var(--warning); }
+
+/* Animations */
+@keyframes ghost-float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes ghost-pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes spectral-breathe {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(52, 211, 153, 0.15);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(52, 211, 153, 0.3);
+  }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-ghost-float {
+  animation: ghost-float 4s ease-in-out infinite;
+}
+
+.animate-ghost-pulse {
+  animation: ghost-pulse 2s ease-in-out infinite;
+}
+
+.animate-spectral-breathe {
+  animation: spectral-breathe 3s ease-in-out infinite;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.4s ease-out forwards;
+}
