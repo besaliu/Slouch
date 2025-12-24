@@ -1,0 +1,146 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: macos-latest
+            target: aarch64-apple-darwin
+            name: macOS-ARM64
+          - platform: macos-latest
+            target: x86_64-apple-darwin
+            name: macOS-Intel
+          - platform: windows-latest
+            target: x86_64-pc-windows-msvc
+            name: Windows-x64
+
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Install dependencies (macOS)
+        if: matrix.platform == 'macos-latest'
+        run: rustup target add ${{ matrix.target }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Tauri app
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: 'Slouch Ghost ${{ github.ref_name }}'
+          releaseBody: |
+            ## Installation
+
+            ### macOS (Homebrew)
+            ```bash
+            brew install --cask besaliu/tap/slouch-ghost
+            ```
+
+            ### Windows
+            Download and run the `.msi` or `.exe` installer below.
+
+            ## Privacy
+            All processing happens locally on your device. No data is sent anywhere.
+          releaseDraft: false
+          prerelease: false
+          args: --target ${{ matrix.target }}
+
+  update-homebrew:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout homebrew-tap
+        uses: actions/checkout@v4
+        with:
+          repository: besaliu/homebrew-tap
+          token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          path: homebrew-tap
+
+      - name: Wait for release assets
+        run: sleep 30
+
+      - name: Get release info
+        id: release
+        run: |
+          VERSION="${{ github.ref_name }}"
+          VERSION="${VERSION#v}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+          # Download macOS ARM64 DMG and get SHA256
+          DMG_URL="https://github.com/besaliu/Slouch/releases/download/${{ github.ref_name }}/Slouch.Ghost_${VERSION}_aarch64.dmg"
+          echo "Downloading from: $DMG_URL"
+          curl -sL "$DMG_URL" -o slouch.dmg
+          SHA256=$(shasum -a 256 slouch.dmg | cut -d' ' -f1)
+          echo "sha256=$SHA256" >> $GITHUB_OUTPUT
+          echo "SHA256: $SHA256"
+
+      - name: Update cask formula
+        run: |
+          VERSION="${{ steps.release.outputs.version }}"
+          SHA256="${{ steps.release.outputs.sha256 }}"
+
+          cat > homebrew-tap/Casks/slouch-ghost.rb << EOF
+          cask "slouch-ghost" do
+            version "$VERSION"
+            sha256 "$SHA256"
+
+            url "https://github.com/besaliu/Slouch/releases/download/v#{version}/Slouch.Ghost_#{version}_aarch64.dmg"
+            name "Slouch Ghost"
+            desc "Privacy-first posture monitor with on-device AI"
+            homepage "https://github.com/besaliu/Slouch"
+
+            livecheck do
+              url :url
+              strategy :github_latest
+            end
+
+            app "Slouch Ghost.app"
+
+            postflight do
+              system_command "/usr/bin/xattr",
+                             args: ["-cr", "#{appdir}/Slouch Ghost.app"],
+                             sudo: false
+            end
+
+            zap trash: [
+              "~/Library/Application Support/com.benliu.slouch-ghost",
+              "~/Library/Preferences/com.benliu.slouch-ghost.plist",
+              "~/Library/Caches/com.benliu.slouch-ghost",
+            ]
+          end
+          EOF
+
+          # Remove leading whitespace from heredoc
+          sed -i 's/^          //' homebrew-tap/Casks/slouch-ghost.rb
+
+      - name: Commit and push
+        run: |
+          cd homebrew-tap
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add Casks/slouch-ghost.rb
+          git commit -m "Update slouch-ghost to ${{ github.ref_name }}"
+          git push
